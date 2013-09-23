@@ -126,7 +126,7 @@
         <script>
             
             
-(function(win,$,_,mmt){
+(function(win,$,_,mmt,document){
     "use strict";
 
     win.TIMEPEACE = win.TIMEPEACE || {};
@@ -173,10 +173,19 @@
 
         },
         
-        currentTimeObj = function(){
+        currentTimeObj = function(existing){
+            
+            if(existing===undefined){
+                return mmt();
+            }
+            else{
+                return mmt(existing);
+            }
     
-            return mmt();
-    
+        },
+        
+        pastTime = function(time){
+            return mmt(time).format('h:mm:ss a');
         },
         
         currentDate = function(){
@@ -205,7 +214,8 @@
             currentTimeObj : currentTimeObj,
             duration : duration,
             sumDurations : sumDurations,
-            currentDate : currentDate
+            currentDate : currentDate,
+            pastTime : pastTime
         };
     })();
     
@@ -296,16 +306,16 @@
                 var x = win.localStorage.getItem(stringGlobalSymbol),
                     b;
                 
-                if(x!==null){
-                    b = window.confirm("Load previous records?");
-                    
+                if(x!==null && x!==""){
+                    //b = window.confirm("Load previous records?");
+                    b = true;
                     if(b){
                         loadRecords();
                     }
                 }
             },
             
-            startActivity = function(activity){
+            startActivity = function(activity,oldStartTime){
                 if(!activityInProgress){
                     
                     $(document).trigger("beforeactivitystart");
@@ -314,14 +324,26 @@
                     
                     //update obj props
                     currentActivity.name = activity;
-                    currentActivity.startTime = self.timeKeeper.currentTime();
-                    currentActivity.startTimeObj = self.timeKeeper.currentTimeObj();
-                    currentActivity.duration = 0;
+                    
+                    if(oldStartTime===undefined){
+                        currentActivity.startTime = self.timeKeeper.currentTime();
+                        currentActivity.startTimeObj = self.timeKeeper.currentTimeObj();
+                        currentActivity.duration = 0;
+                    }
+                    else{
+                        //use the previous
+                        currentActivity.startTime = self.timeKeeper.pastTime(oldStartTime);
+                        currentActivity.startTimeObj = self.timeKeeper.currentTimeObj(oldStartTime);
+                        currentActivity.duration = 0;
+                    }
+                    
                     currentActivity.id = currentId;
                     activityInProgress = true;
                     
                     updateDuration();
                     durationTimer = win.setInterval(function(){updateDuration();},10000);
+                    
+                    storeCurrent();
                     
                     $(document).trigger("activitystart",currentActivity);
                 }
@@ -341,7 +363,6 @@
                     //create a record of this activity
                     newRecord(currentActivity);
 
-                    currentId = currentId + 1;
                     activityInProgress = false;
                     win.clearInterval(durationTimer);    
                     
@@ -449,6 +470,8 @@
                 
                 records.push(toRecord);
                 
+                currentId = currentId + 1;
+                
                 storeRecords();
                 
                 updateSummary();
@@ -464,6 +487,19 @@
             },
             storeRecords = function(){
                 storeLocal("records");
+            },
+            storeCurrent = function(){
+                if(activityInProgress){
+                    storeLocal("currentActivity");
+                }
+            },
+            reloadCurrent = function(){
+                
+                var activity = win.localStorage.getItem(stringGlobalSymbol+"currentActivityname"),
+                    time = win.localStorage.getItem(stringGlobalSymbol+"currentActivitystart");
+                if(time!==null && activity!==null){
+                    startActivity(activity,time);
+                }
             },
             retrieveRecords = function(){
                 var jsonStr = win.localStorage.getItem(stringGlobalSymbol),
@@ -510,12 +546,19 @@
                     
                     win.localStorage.setItem(stringGlobalSymbol+what,names.toString());
                 }
+                else if(what==="currentActivity"){
+                    
+                    win.localStorage.setItem(stringGlobalSymbol+what+"name",currentActivity.name);
+                    win.localStorage.setItem(stringGlobalSymbol+what+"start",currentActivity.startTimeObj);
+                    
+                }
         
             },
             storeRemote = function(){
                 //TODO
             };
-        
+        //TODO the list of exposed functions should be reduced
+        //leaving some temporarily for console testing
         return {
             startActivity : startActivity,
             stopActivity : stopActivity,
@@ -527,7 +570,9 @@
             promptLoadRecords : promptLoadRecords,
             clearStored : clearStored,
             clearAuto : clearAuto,
-            clearRecords : clearRecords
+            clearRecords : clearRecords,
+            storeCurrent : storeCurrent,
+            reloadCurrent : reloadCurrent
         };
         
     })();
@@ -643,7 +688,20 @@
     })();
     
     self.controls.btnStart.on("click",function(event){
-        self.recordKeeper.startActivity($("#activityIn").val());
+        
+        var f = $("#activityIn"),
+            valin = f.val();
+        
+        valin = valin.replace(/</gi,"&lt;");
+        valin = valin.replace(/>/gi,"&gt;");
+        
+        if(valin!==""){
+            f.removeClass("err");
+            self.recordKeeper.startActivity(valin);
+        }
+        else{
+            f.addClass("err");
+        }
     });
     
     self.controls.btnStop.on("click",function(event){
@@ -678,8 +736,9 @@
     });
     
     self.recordKeeper.promptLoadRecords();
+    self.recordKeeper.reloadCurrent();
     
-})(window,jQuery,_,moment);    
+})(window,jQuery,_,moment,document);    
 
 
         </script>
