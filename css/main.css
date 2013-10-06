@@ -103,7 +103,16 @@ textarea {
 
 .err{border:1px solid red;}
 
-
+ @media(max-width: 480px){
+    #nav li{
+        width:100%;
+    }
+    #timeView span{
+        display:block;
+        width:98%;
+        padding: 6px 1%;
+    }
+}
 
 
 
