@@ -1,4 +1,4 @@
-(function(win,$,_,mmt,document){
+(function(win,$,mmt,document){
     "use strict";
 
     win.TIMEPEACE = win.TIMEPEACE || {};
@@ -605,4 +605,4 @@
     self.recordKeeper.promptLoadRecords();
     self.recordKeeper.reloadCurrent();
     
-})(window,jQuery,_,moment,document);
+})(window,jQuery,moment,document);
