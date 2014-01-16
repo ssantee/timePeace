@@ -238,8 +238,10 @@
                     win.clearInterval(durationTimer);    
                     
                     //clear current,
+                    win.localStorage.removeItem(stringGlobalSymbol+"currentActivityname",currentActivity.name);
+                    win.localStorage.removeItem(stringGlobalSymbol+"currentActivitystart",currentActivity.startTimeObj);
                     currentActivity = {};
-                    
+
                     $(document).trigger("activitystop");
                     
                 }
