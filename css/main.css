@@ -93,6 +93,8 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+#jsWarn{display:none;}
+.no-js #jsWarn{display:block;}
 
 .view{
     display:none;
