@@ -103,16 +103,52 @@ textarea {
     display:block;
 }
 
+#otherView input{
+    display: block;
+}
+
 .err{border:1px solid red;}
 
  @media(max-width: 480px){
-    #nav li{
-        width:100%;
+    
+    #nav{
+        margin:12px 0;
+        padding-left: 15px;
     }
+
+    #nav li{
+        font-size: .5em;
+    }
+
+    #nav li a{
+        padding: 4px 7px;
+    }
+    
+    .badge{
+        font-size: 8px;
+        min-width: 8px;
+        padding: 2px 6px;
+    }
+
     #timeView span{
         display:block;
         width:98%;
         padding: 6px 1%;
+        font-size: .7em;
+        text-align: center;
+    }
+
+    #recordsView table,#summaryView table{
+        font-size: .8em;
+    }
+
+    label{
+        font-size: .7em;
+    }
+
+    .btn{
+        margin:12px 0;
+        width:100%;
     }
 }
 
